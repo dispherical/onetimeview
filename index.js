@@ -96,7 +96,7 @@ app.view('say_modal', async ({ ack, view, body, client, respond }) => {
         const actionObj = values[blockId];
         const [actionId, inputData] = Object.entries(actionObj)[0];
 
-        if (inputData.type === 'rich_text_input') {
+        if (inputData.type === 'rich_text_input' && inputData.rich_text_value) {
             const sections = inputData.rich_text_value.elements;
             extracted[actionId] = sections
                 .map(section =>
