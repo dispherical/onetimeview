@@ -204,7 +204,10 @@ app.action("stats", async ({ ack, respond, say, body, payload }) => {
             id
         }
     })
-
+    const user = (await app.client.users.info({
+        user: body.user.id
+    })).user
+    const tz = user?.tz
     if (rec.user !== body.user.id) return await app.client.chat.postEphemeral({
         user: body.user.id,
         channel: body.channel.id,
@@ -215,11 +218,11 @@ app.action("stats", async ({ ack, respond, say, body, payload }) => {
             messageId: id
         }
     })
-    views = views.map(view => `<@${view.user}> on ${view.createdAt.toLocaleString()} (<https://time.cs50.io/${view.createdAt.toISOString()}|convert time>)`)
+    views = views.map(view => `- <@${view.user}> on ${view.createdAt.toLocaleString('en-US', { timeZone: tz, timeStyle: "short", dateStyle: "long" })}`)
     await app.client.chat.postEphemeral({
         user: body.user.id,
         channel: body.channel.id,
-        text: views.length !== 0 ? views.join("\n") : `No views yet.`
+        text: views.length !== 0 ? views.join("\n") + `\n\n(times and dates are in \`${user?.tz_label}\`)` : `No views yet.`
     })
 });
 app.action("view", async ({ ack, respond, say, body, payload }) => {
