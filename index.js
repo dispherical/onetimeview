@@ -18,18 +18,21 @@ app.command('/onetimeview', async ({ command, ack, client }) => {
         const rec = await prisma.message.create({
             data: {
                 user: command.user_id,
-                message: command.text
+                message: command.text,
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             }
         })
         await client.chat.postMessage({
             channel: command.channel_id,
-            text: `<@${command.user_id}> has sent a message which can only be viewed once. It will expire in 1 week from now.`,
+            text: `:viewonce: <@${command.user_id}> has sent a message which can only be viewed once. <https://time.cs50.io/${rec.expires.toISOString()}|It will expire in 1 week from now>.`,
+            unfurl_media: false,
+            unfurl_links: false,
             blocks: [
                 {
                     type: "section",
                     text: {
                         type: "mrkdwn",
-                        text: `:viewonce: <@${command.user_id}> has sent a message which can only be viewed once. It will expire in 1 week from now.`,
+                        text: `:viewonce: <@${command.user_id}> has sent a message which can only be viewed once. <https://time.cs50.io/${rec.expires.toISOString()}|It will expire in 1 week from now>.`,
                     },
                 },
                 {
@@ -105,25 +108,35 @@ app.view('say_modal', async ({ ack, view, body, client, respond }) => {
         } else if (inputData.type === 'plain_text_input') {
             extracted[actionId] = inputData.value;
         }
+        else if (inputData.type === 'datetimepicker') {
+            extracted[actionId] = new Date(inputData.selected_date_time * 1000);
+        }
     }
 
     const rec = await prisma.message.create({
         data: {
             user: body.user.id,
             message: extracted.text,
-            image: extracted.image
+            image: extracted.image,
+            expires: extracted.expires
         }
     })
     try {
+        const user = (await app.client.users.info({
+            user: body.user.id
+        })).user
+        const tz = user?.tz
         await client.chat.postMessage({
             channel: channel,
-            text: `<@${body.user.id}> has sent a message which can only be viewed once. It will expire in 1 week from now.`,
+            text: `:viewonce: <@${body.user.id}> has sent a message which can only be viewed once. It will expire on ${extracted.expires.toLocaleString('en-US', { timeZone: tz, timeStyle: "short", dateStyle: "long" })} (${user.tz_label}, <https://time.cs50.io/${extracted.expires.toISOString()}|click to convert>)`,
+            unfurl_media: false,
+            unfurl_links: false,
             blocks: [
                 {
                     type: "section",
                     text: {
                         type: "mrkdwn",
-                        text: `:viewonce: <@${body.user.id}> has sent a message which can only be viewed once. It will expire in 1 week from now.`,
+                        text: `:viewonce: <@${body.user.id}> has sent a message which can only be viewed once. It will expire on ${extracted.expires.toLocaleString('en-US', { timeZone: tz, timeStyle: "short", dateStyle: "long" })} (${user.tz_label}, <https://time.cs50.io/${extracted.expires.toISOString()}|click to convert>)`,
                     },
                 },
                 {
@@ -232,6 +245,11 @@ app.action("view", async ({ ack, respond, say, body, payload }) => {
         where: {
             id
         }
+    })
+    if (rec.expires < new Date()) return await app.client.chat.postEphemeral({
+        user: body.user.id,
+        channel: body.channel.id,
+        text: "This view-once message has expired already."
     })
     const modal = {
         "type": "modal",

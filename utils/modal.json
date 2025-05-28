@@ -1,47 +1,59 @@
 {
-  "type": "modal",
-  "callback_id": "say_modal",
-  "title": {
-    "type": "plain_text",
-    "text": "One Time View",
-    "emoji": true
-  },
-  "submit": {
-    "type": "plain_text",
-    "text": "Submit",
-    "emoji": true
-  },
-  "close": {
-    "type": "plain_text",
-    "text": "Cancel",
-    "emoji": true
-  },
-  "blocks": [
-    {
-      "type": "input",
-      "optional": true,
-      "element": {
-        "type": "rich_text_input",
-        "action_id": "text"
-      },
-      "label": {
-        "type": "plain_text",
-        "text": "Add some text",
-        "emoji": true
-      }
-    },
-    {
-      "type": "input",
-      "optional": true,
-      "element": {
-        "type": "plain_text_input",
-        "action_id": "image"
-      },
-      "label": {
-        "type": "plain_text",
-        "text": "Add an image",
-        "emoji": true
-      }
-    }
-  ]
+	"type": "modal",
+	"callback_id": "say_modal",
+	"title": {
+		"type": "plain_text",
+		"text": "One Time View",
+		"emoji": true
+	},
+	"submit": {
+		"type": "plain_text",
+		"text": "Submit",
+		"emoji": true
+	},
+	"close": {
+		"type": "plain_text",
+		"text": "Cancel",
+		"emoji": true
+	},
+	"blocks": [
+		{
+			"type": "input",
+			"optional": true,
+			"element": {
+				"type": "rich_text_input",
+				"action_id": "text"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Add some text",
+				"emoji": true
+			}
+		},
+		{
+			"type": "input",
+			"optional": true,
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "image"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Add an image",
+				"emoji": true
+			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "datetimepicker",
+				"action_id": "expires"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Set an expiry date",
+				"emoji": true
+			}
+		}
+	]
 }

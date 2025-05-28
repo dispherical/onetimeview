@@ -14,6 +14,7 @@ model Message {
     user      String // Workspace ID NOT Global ID
     message   String?
     image     String?
+    expires   DateTime @default(now())
 }
 
 model View {
